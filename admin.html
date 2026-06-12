@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAC Members — Desk Console</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Albert+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0b1626;--panel:#101e33;--slate:#5d7083;--mist:#9db0c2;--snow:#f2f6fa;--wsa:#1ca5e0;--wsa-bright:#46c3f2;--gold:#e8b96f;--line:rgba(242,246,250,.12);
+--serif:"Instrument Serif",serif;--sans:"Albert Sans",sans-serif;--mono:"Spline Sans Mono",monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--night);color:var(--snow);font-size:15px;line-height:1.5;padding:24px 16px 80px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:34px;margin-bottom:4px}
+h1 em{font-style:italic;color:var(--wsa-bright)}
+.sub{color:var(--mist);font-size:14px;margin-bottom:24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:11px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(28,165,224,.06) 6px 7px);display:flex;justify-content:space-between;gap:10px}
+.card-body{padding:16px}
+input,textarea,select{background:rgba(242,246,250,.05);border:1px solid var(--line);border-radius:4px;padding:10px 12px;color:var(--snow);font-family:var(--sans);font-size:14.5px;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--wsa)}
+label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);margin:10px 0 5px}
+.btn{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--wsa);color:#fff;border:0;border-radius:4px;padding:11px 18px;cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--wsa-bright)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--snow)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.mono{font-family:var(--mono);font-size:12.5px}
+.pill{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
+.st-pending{color:var(--gold);border-color:rgba(232,185,111,.5)}
+.st-quoted{color:var(--wsa-bright)}
+.st-accepted{color:#3fbf7f;border-color:rgba(63,191,127,.5)}
+.hidden{display:none}
+.msg{font-family:var(--mono);font-size:12px;color:var(--wsa-bright);min-height:16px;margin-top:8px}
+.q-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.q-actions select{width:auto}
+@media(max-width:700px){table,thead,tbody,tr{display:block}th{display:none}td{display:block;border-bottom:0}tr{border-bottom:1px solid var(--line);padding:8px 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Desk <em>console.</em></h1>
+  <p class="sub">Quote requests, jet card balances, client roster — TAC Members admin.</p>
+
+  <div class="card" id="keyCard">
+    <div class="card-head">Authenticate</div>
+    <div class="card-body">
+      <label for="adminKey">Admin key (the ADMIN_KEY environment variable)</label>
+      <input id="adminKey" type="password">
+      <div style="margin-top:12px"><button class="btn" id="loadBtn">Open console</button></div>
+      <div class="msg" id="keyMsg"></div>
+    </div>
+  </div>
+
+  <div id="console" class="hidden">
+    <!-- requests inbox -->
+    <div class="card">
+      <div class="card-head"><span>Quote requests</span><button class="btn ghost" style="padding:5px 12px" onclick="load()">Refresh</button></div>
+      <div class="card-body" style="padding:0"><table id="reqTable">
+        <thead><tr><th>Client</th><th>Trip</th><th>Status</th><th>Quote / actions</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <!-- jet card management -->
+    <div class="card">
+      <div class="card-head">Jet card — set terms / log activity</div>
+      <div class="card-body">
+        <div class="row">
+          <div><label>Client email</label><input id="jcEmail" placeholder="client@email.com" list="clientEmails"></div>
+          <div><label>Tier label</label><input id="jcTier" placeholder="Tier 50"></div>
+          <div><label>Total hours</label><input id="jcTotal" inputmode="decimal" placeholder="50"></div>
+          <div><label>Rate label</label><input id="jcRate" placeholder="$3,900/hr locked"></div>
+        </div>
+        <div style="margin-top:12px"><button class="btn" onclick="setCard()">Save card terms</button></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+        <div class="row">
+          <div><label>Hours Δ (negative = flown)</label><input id="txDelta" inputmode="decimal" placeholder="-2.5"></div>
+          <div style="grid-column:span 2"><label>Note</label><input id="txNote" placeholder="TPA → NAS · 06/14"></div>
+        </div>
+        <div style="margin-top:12px"><button class="btn" onclick="adjust()">Log activity</button></div>
+        <div class="msg" id="jcMsg"></div>
+      </div>
+    </div>
+
+    <!-- clients -->
+    <div class="card">
+      <div class="card-head">Clients</div>
+      <div class="card-body">
+        <div class="row">
+          <div><label>Email</label><input id="cEmail" placeholder="new@client.com"></div>
+          <div><label>Name</label><input id="cName"></div>
+          <div><label>Phone</label><input id="cPhone"></div>
+        </div>
+        <div style="margin-top:12px"><button class="btn" onclick="saveClient()">Add / update client</button></div>
+        <div class="msg" id="cMsg"></div>
+        <div style="padding:8px 0 0"><table id="clientTable">
+          <thead><tr><th>Client</th><th>Jet card</th><th>Hours left</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+<datalist id="clientEmails"></datalist>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let KEY=sessionStorage.getItem('tac_admin_key')||'';
+if(KEY)$('#adminKey').value=KEY;
+
+async function call(body){
+  const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json','X-Admin-Key':KEY},body:JSON.stringify(body)});
+  return r.json();
+}
+
+$('#loadBtn').addEventListener('click',()=>{KEY=$('#adminKey').value.trim();sessionStorage.setItem('tac_admin_key',KEY);load();});
+
+async function load(){
+  $('#keyMsg').textContent='';
+  const d=await call({action:'list'}).catch(()=>({ok:false,error:'network error'}));
+  if(!d.ok){$('#keyMsg').textContent=d.error||'Failed.';return;}
+  $('#keyCard').classList.add('hidden');$('#console').classList.remove('hidden');
+
+  $('#clientEmails').innerHTML=d.clients.map(c=>`<option value="${esc(c.email)}">`).join('');
+  $('#clientTable tbody').innerHTML=d.clients.map(c=>{
+    const left=c.hours_total!=null?Math.round((c.hours_total-(c.hours_used||0))*10)/10:null;
+    return `<tr><td><b>${esc(c.name||'—')}</b><br><span class="mono">${esc(c.email)}${c.phone?' · '+esc(c.phone):''}</span></td>
+      <td class="mono">${esc(c.tier||'—')}${c.rate_label?'<br>'+esc(c.rate_label):''}</td>
+      <td class="mono">${left!=null?left+' / '+c.hours_total+' hrs':'—'}</td></tr>`;
+  }).join('')||'<tr><td colspan="3" class="mono" style="color:var(--mist)">No clients yet.</td></tr>';
+
+  $('#reqTable tbody').innerHTML=d.requests.map(r=>`
+    <tr>
+      <td><b>${esc(r.name||'—')}</b><br><span class="mono">${esc(r.email)}</span></td>
+      <td class="mono">${esc(r.from_ap)} → ${esc(r.to_ap)}<br>${esc(r.depart_date||'TBD')}${r.return_date?' → '+esc(r.return_date):''} · ${esc(r.pax||'—')} pax
+        ${r.notes?'<br><span style="color:var(--mist)">'+esc(r.notes)+'</span>':''}</td>
+      <td><span class="pill st-${r.status}">${r.status}</span><br><span class="mono" style="color:var(--mist)">${esc((r.created_at||'').slice(0,16))}</span></td>
+      <td>
+        ${r.status==='pending'||r.status==='quoted'?`
+          <input placeholder="$14,800 all-in" id="amt-${r.id}" style="margin-bottom:6px">
+          <input placeholder="Message (aircraft, terms…)" id="msg-${r.id}" style="margin-bottom:6px">
+          <input placeholder="Valid until (e.g. 06/20)" id="vu-${r.id}" style="margin-bottom:6px">
+          <button class="btn" onclick="quote('${r.id}')">Send quote</button>`:''}
+        <div class="q-actions">
+          <select id="st-${r.id}">
+            ${['pending','quoted','accepted','booked','closed'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+          <button class="btn ghost" onclick="setStatus('${r.id}')">Set</button>
+        </div>
+      </td>
+    </tr>`).join('')||'<tr><td colspan="4" class="mono" style="color:var(--mist)">No requests yet.</td></tr>';
+}
+
+async function quote(id){
+  const r=await call({action:'quote',request_id:id,amount:$('#amt-'+id).value,message:$('#msg-'+id).value,valid_until:$('#vu-'+id).value});
+  alert(r.ok?'Quote sent — client notified.':(r.error||'Failed'));if(r.ok)load();
+}
+async function setStatus(id){
+  const r=await call({action:'status',request_id:id,status:$('#st-'+id).value});
+  if(r.ok)load();else alert(r.error||'Failed');
+}
+async function setCard(){
+  const r=await call({action:'setcard',email:$('#jcEmail').value,tier:$('#jcTier').value,hours_total:parseFloat($('#jcTotal').value||'0'),rate_label:$('#jcRate').value});
+  $('#jcMsg').textContent=r.ok?'✓ Card saved.':(r.error||'Failed');if(r.ok)load();
+}
+async function adjust(){
+  const r=await call({action:'adjust',email:$('#jcEmail').value,delta_hours:parseFloat($('#txDelta').value),note:$('#txNote').value});
+  $('#jcMsg').textContent=r.ok?'✓ Activity logged.':(r.error||'Failed');if(r.ok)load();
+}
+async function saveClient(){
+  const r=await call({action:'client',email:$('#cEmail').value,name:$('#cName').value,phone:$('#cPhone').value});
+  $('#cMsg').textContent=r.ok?(r.created?'✓ Client created.':'✓ Client updated.'):(r.error||'Failed');if(r.ok)load();
+}
+if(KEY)load();
+</script>
+</body>
+</html>

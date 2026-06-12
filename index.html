@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TAC Members — Tampa Air Charter</title>
+<meta name="description" content="Tampa Air Charter members — request quotes, receive them in-app, and track your jet card hours.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b1626">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TAC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Albert+Sans:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#e8b96f;--night:#0b1626;--panel:#101e33;--panel-2:#0d1a2c;--ink:#13222f;
+  --slate:#5d7083;--mist:#9db0c2;--snow:#f2f6fa;--wsa:#1ca5e0;--wsa-bright:#46c3f2;
+  --line-d:rgba(242,246,250,.12);--ok:#3fbf7f;--warn:#e8b96f;
+  --serif:"Instrument Serif",Georgia,serif;--sans:"Albert Sans",system-ui,sans-serif;--mono:"Spline Sans Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:
+  radial-gradient(110% 70% at 85% -5%,rgba(28,165,224,.10),transparent 55%),
+  radial-gradient(120% 80% at 10% 105%,rgba(232,185,111,.12),transparent 50%),
+  var(--night);
+  color:var(--snow);min-height:100svh;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px}
+a{color:var(--wsa-bright);text-decoration:none}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--mist)}
+h1,h2{font-family:var(--serif);font-weight:400}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:14px 22px;border-radius:4px;border:0;cursor:pointer;transition:all .2s;background:var(--wsa);color:#fff;width:100%}
+.btn:hover{background:var(--wsa-bright)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;border:1px solid var(--line-d);color:var(--snow)}
+.btn.ghost:hover{border-color:var(--wsa)}
+input,textarea,select{width:100%;background:rgba(242,246,250,.05);border:1px solid var(--line-d);border-radius:4px;padding:14px;color:var(--snow);font-family:var(--sans);font-size:16px;transition:border-color .2s}
+input:focus,textarea:focus{outline:none;border-color:var(--wsa)}
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mist);margin:14px 0 6px}
+.card{background:var(--panel);border:1px solid var(--line-d);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.card-head{display:flex;justify-content:space-between;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line-d);font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(28,165,224,.06) 6px 7px)}
+.card-head b{color:var(--wsa-bright);font-weight:600}
+.card-body{padding:18px}
+.status-pill{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid var(--line-d);white-space:nowrap}
+.st-pending{color:var(--mist)}
+.st-quoted{color:var(--wsa-bright);border-color:rgba(70,195,242,.5)}
+.st-accepted{color:var(--ok);border-color:rgba(63,191,127,.5)}
+.st-booked{color:var(--gold);border-color:rgba(232,185,111,.5)}
+.st-closed{color:var(--slate)}
+.hidden{display:none!important}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--wsa);border-radius:6px;padding:12px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:99;max-width:90vw;text-align:center}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:50;background:rgba(11,22,38,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-d)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+.top img{height:30px}
+.top .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--mist);text-align:right}
+.top .who button{background:none;border:0;color:var(--wsa-bright);font:inherit;cursor:pointer;letter-spacing:inherit;padding:0}
+
+/* login */
+#loginView{min-height:100svh;display:flex;align-items:center}
+#loginView .inner{width:100%;padding:40px 0}
+#loginView img{height:74px;margin:0 auto 28px;display:block}
+#loginView h1{font-size:38px;text-align:center;margin-bottom:6px}
+#loginView h1 em{font-style:italic;color:var(--wsa-bright)}
+#loginView .sub{text-align:center;color:var(--mist);font-size:15px;max-width:330px;margin:0 auto 30px}
+.login-card{background:var(--panel);border:1px solid var(--line-d);border-radius:8px;padding:24px;max-width:380px;margin:0 auto}
+.err{font-family:var(--mono);font-size:12px;color:#e88f6f;margin-top:10px;min-height:16px}
+.devnote{font-family:var(--mono);font-size:11px;color:var(--gold);margin-top:10px}
+
+/* jet card */
+.jet-balance{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.jet-balance .big{font-family:var(--serif);font-size:56px;line-height:1}
+.jet-balance .big small{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--mist);display:block;margin-top:4px;text-transform:uppercase}
+.jet-meta{font-family:var(--mono);font-size:12px;color:var(--mist);text-align:right}
+.jet-meta b{color:var(--snow);display:block;font-size:14px}
+.fuel{height:10px;background:rgba(242,246,250,.08);border-radius:6px;overflow:hidden;margin-top:16px}
+.fuel>div{height:100%;background:linear-gradient(90deg,var(--wsa),var(--wsa-bright));border-radius:6px;transition:width 1s cubic-bezier(.2,.7,.2,1)}
+.fuel.low>div{background:linear-gradient(90deg,#b86a3f,var(--gold))}
+.tx{font-family:var(--mono);font-size:12.5px;border-top:1px solid var(--line-d);margin-top:16px;padding-top:6px}
+.tx .row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;color:var(--mist)}
+.tx .row b{color:var(--snow);font-weight:500;white-space:nowrap}
+.tx .row b.pos{color:var(--ok)}
+
+/* requests */
+.req{border-bottom:1px solid var(--line-d);padding:16px 18px}
+.req:last-child{border-bottom:0}
+.req-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.req-route{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.04em}
+.req-sub{font-family:var(--mono);font-size:11px;color:var(--mist);margin-top:4px}
+.quote-bubble{margin-top:12px;background:rgba(28,165,224,.08);border:1px solid rgba(28,165,224,.35);border-radius:6px;padding:14px}
+.quote-bubble .amt{font-family:var(--serif);font-size:26px;color:var(--wsa-bright)}
+.quote-bubble .msg{font-size:14px;color:var(--mist);margin-top:6px}
+.quote-bubble .vu{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:8px}
+.quote-bubble .btn{margin-top:12px;padding:11px}
+.empty{padding:26px 18px;text-align:center;color:var(--mist);font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+
+/* request modal */
+.modal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:560px){.modal{align-items:center}}
+.modal-back{position:absolute;inset:0;background:rgba(5,10,18,.75);backdrop-filter:blur(4px)}
+.sheet{position:relative;background:var(--panel);border:1px solid var(--line-d);border-radius:14px 14px 0 0;width:min(520px,100%);max-height:92svh;overflow:auto;padding:22px 20px calc(22px + env(safe-area-inset-bottom))}
+@media(min-width:560px){.sheet{border-radius:10px}}
+.sheet h2{font-size:28px;margin-bottom:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:60;width:auto;border-radius:50px;padding:16px 22px;box-shadow:0 14px 40px -8px rgba(28,165,224,.55)}
+main{padding:20px 0 110px}
+.refresh{background:none;border:0;color:var(--mist);font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;cursor:pointer;text-transform:uppercase}
+.refresh:hover{color:var(--wsa-bright)}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginView">
+  <div class="wrap inner">
+    <img src="icons/icon-192.png" alt="Tampa Air Charter" style="border-radius:22%">
+    <h1>Members <em>deck.</em></h1>
+    <p class="sub">Request quotes, get them back in minutes, and watch your jet card hours — all in one place.</p>
+    <div class="login-card">
+      <div id="stepEmail">
+        <label for="email">Email</label>
+        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+        <div style="margin-top:16px"><button class="btn" id="sendBtn">Email me a sign-in code</button></div>
+      </div>
+      <div id="stepCode" class="hidden">
+        <label for="code">6-digit code — sent to <span id="sentTo" class="mono"></span></label>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+        <div style="margin-top:16px"><button class="btn" id="verifyBtn">Sign in</button></div>
+        <div style="margin-top:10px"><button class="btn ghost" id="backBtn">Use a different email</button></div>
+        <div class="devnote hidden" id="devNote"></div>
+      </div>
+      <div class="err" id="loginErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="hidden">
+  <div class="top">
+    <div class="wrap">
+      <img src="icons/icon-192.png" alt="TAC" style="border-radius:22%">
+      <div class="who"><span id="whoEmail"></span><br><button id="logoutBtn">Sign out</button></div>
+    </div>
+  </div>
+  <main class="wrap">
+    <!-- jet card -->
+    <div class="card" id="cardJet">
+      <div class="card-head"><span>Jet Card</span><b id="jetTier">—</b></div>
+      <div class="card-body" id="jetBody"></div>
+    </div>
+    <!-- requests -->
+    <div class="card">
+      <div class="card-head"><span>Quote Requests</span><button class="refresh" id="refreshBtn">Refresh</button></div>
+      <div id="reqList"></div>
+    </div>
+    <p style="text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--slate);text-transform:uppercase">
+      Desk: <a href="tel:+18134219070">(813) 421-9070</a> · Operated under FAA Part 135
+    </p>
+  </main>
+  <button class="btn fab" id="newReqBtn">+ Request a quote</button>
+</div>
+
+<!-- ============ NEW REQUEST SHEET ============ -->
+<div class="modal hidden" id="reqModal">
+  <div class="modal-back" id="reqBack"></div>
+  <div class="sheet">
+    <div class="eyebrow">TAC · Quote request</div>
+    <h2>Where to?</h2>
+    <div class="grid2">
+      <div><label for="rFrom">From</label><input id="rFrom" placeholder="TPA" value="TPA"></div>
+      <div><label for="rTo">To</label><input id="rTo" placeholder="City or airport"></div>
+      <div><label for="rDepart">Depart</label><input id="rDepart" type="date"></div>
+      <div><label for="rReturn">Return (optional)</label><input id="rReturn" type="date"></div>
+    </div>
+    <label for="rPax">Passengers</label><input id="rPax" inputmode="numeric" placeholder="2">
+    <label for="rNotes">Notes (optional)</label><textarea id="rNotes" rows="2" placeholder="Catering, pets, flexible dates…"></textarea>
+    <div style="margin-top:18px"><button class="btn" id="rSubmit">Send to the desk</button></div>
+    <div class="err" id="rErr"></div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const api=(path,body)=>fetch('/api/'+path,{
+  method:body?'POST':'GET',
+  headers:body?{'content-type':'application/json'}:{},
+  body:body?JSON.stringify(body):undefined,
+  credentials:'same-origin'
+}).then(r=>r.json());
+
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3200);
+}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=s=>{if(!s)return'';const [y,m,d]=s.split('-');return m&&d?`${m}/${d}/${String(y).slice(2)}`:s;};
+const pretty=s=>{try{return new Date(s.replace(' ','T')+'Z').toLocaleDateString('en-US',{month:'short',day:'numeric'})}catch{return s}};
+
+/* ---------- login flow ---------- */
+$('#sendBtn').addEventListener('click',async()=>{
+  const email=$('#email').value.trim();$('#loginErr').textContent='';
+  if(!email)return $('#loginErr').textContent='Enter your email.';
+  $('#sendBtn').disabled=true;
+  const r=await api('auth',{action:'send',email}).catch(()=>({ok:false,error:'network error'}));
+  $('#sendBtn').disabled=false;
+  if(!r.ok)return $('#loginErr').textContent=r.error||'Could not send the code.';
+  $('#sentTo').textContent=email;
+  $('#stepEmail').classList.add('hidden');$('#stepCode').classList.remove('hidden');
+  if(r.dev_code){$('#devNote').classList.remove('hidden');$('#devNote').textContent='DEV MODE — your code: '+r.dev_code;}
+  $('#code').focus();
+});
+$('#backBtn').addEventListener('click',()=>{
+  $('#stepCode').classList.add('hidden');$('#stepEmail').classList.remove('hidden');
+  $('#devNote').classList.add('hidden');$('#loginErr').textContent='';
+});
+$('#verifyBtn').addEventListener('click',verify);
+$('#code').addEventListener('keydown',e=>{if(e.key==='Enter')verify();});
+async function verify(){
+  const email=$('#email').value.trim(),code=$('#code').value.trim();
+  $('#loginErr').textContent='';$('#verifyBtn').disabled=true;
+  const r=await api('auth',{action:'verify',email,code}).catch(()=>({ok:false,error:'network error'}));
+  $('#verifyBtn').disabled=false;
+  if(!r.ok)return $('#loginErr').textContent=r.error||'Could not sign in.';
+  boot();
+}
+$('#logoutBtn').addEventListener('click',async()=>{await api('auth',{action:'logout'});location.reload();});
+
+/* ---------- dashboard ---------- */
+async function boot(){
+  const me=await api('me').catch(()=>null);
+  if(!me||!me.ok){ $('#loginView').classList.remove('hidden');$('#appView').classList.add('hidden');return; }
+  $('#loginView').classList.add('hidden');$('#appView').classList.remove('hidden');
+  $('#whoEmail').textContent=me.client.name||me.client.email;
+  renderJet(me.jetcard);
+  renderReqs(me.requests);
+}
+function renderJet(j){
+  if(!j){
+    $('#jetTier').textContent='NOT ENROLLED';
+    $('#jetBody').innerHTML='<div class="empty">No jet card on file — ask the desk about locking your rate.<br><a href="https://tampa-air-charter.pages.dev/jetcard.html" target="_blank" rel="noopener">See the TAC Jet Card →</a></div>';
+    return;
+  }
+  $('#jetTier').textContent=j.tier||'JET CARD';
+  const pct=j.hours_total>0?Math.max(0,Math.min(100,(j.hours_left/j.hours_total)*100)):0;
+  const low=pct<20;
+  $('#jetBody').innerHTML=`
+    <div class="jet-balance">
+      <div class="big">${j.hours_left}<small>Hours remaining</small></div>
+      <div class="jet-meta">of ${j.hours_total} hrs<br><b>${esc(j.rate_label||'')}</b></div>
+    </div>
+    <div class="fuel ${low?'low':''}"><div style="width:${pct}%"></div></div>
+    ${j.history&&j.history.length?`<div class="tx">${j.history.map(t=>
+      `<div class="row"><span>${pretty(t.created_at)} — ${esc(t.note||'activity')}</span><b class="${t.delta_hours>0?'pos':''}">${t.delta_hours>0?'+':''}${t.delta_hours} hr</b></div>`).join('')}</div>`:''}
+  `;
+}
+function renderReqs(list){
+  if(!list||!list.length){
+    $('#reqList').innerHTML='<div class="empty">No requests yet — tap “Request a quote” to start one.</div>';return;
+  }
+  $('#reqList').innerHTML=list.map(r=>{
+    const dates=[fmtDate(r.depart_date),fmtDate(r.return_date)].filter(Boolean).join(' → ');
+    const quotes=(r.quotes||[]).map(q=>`
+      <div class="quote-bubble">
+        <div class="amt">${esc(q.amount)}</div>
+        ${q.message?`<div class="msg">${esc(q.message)}</div>`:''}
+        ${q.valid_until?`<div class="vu">Valid until ${esc(q.valid_until)}</div>`:''}
+        ${r.status==='quoted'?`<button class="btn" data-accept="${r.id}">Accept this quote</button>`:''}
+      </div>`).join('');
+    return `<div class="req">
+      <div class="req-top">
+        <div><div class="req-route">${esc(r.from_ap)} → ${esc(r.to_ap)}</div>
+        <div class="req-sub">${dates||'dates TBD'}${r.pax?` · ${esc(r.pax)} pax`:''} · sent ${pretty(r.created_at)}</div></div>
+        <span class="status-pill st-${r.status}">${r.status}</span>
+      </div>
+      ${r.status==='pending'?'<div class="req-sub" style="margin-top:10px">The desk is pricing this now — your quote lands here.</div>':''}
+      ${quotes}
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[data-accept]').forEach(b=>b.addEventListener('click',async()=>{
+    b.disabled=true;
+    const r=await api('accept',{request_id:b.dataset.accept}).catch(()=>({ok:false}));
+    if(r.ok){toast('✓ Accepted — the desk will confirm shortly.');boot();}
+    else{toast(r.error||'Could not accept.');b.disabled=false;}
+  }));
+}
+$('#refreshBtn').addEventListener('click',boot);
+
+/* ---------- new request ---------- */
+const reqModal=$('#reqModal');
+$('#newReqBtn').addEventListener('click',()=>{reqModal.classList.remove('hidden');$('#rTo').focus();});
+$('#reqBack').addEventListener('click',()=>reqModal.classList.add('hidden'));
+$('#rSubmit').addEventListener('click',async()=>{
+  $('#rErr').textContent='';
+  const body={from:$('#rFrom').value,to:$('#rTo').value,depart:$('#rDepart').value,return:$('#rReturn').value,pax:$('#rPax').value,notes:$('#rNotes').value};
+  if(!body.from.trim()||!body.to.trim())return $('#rErr').textContent='Origin and destination are required.';
+  $('#rSubmit').disabled=true;
+  const r=await api('request',body).catch(()=>({ok:false,error:'network error'}));
+  $('#rSubmit').disabled=false;
+  if(!r.ok)return $('#rErr').textContent=r.error||'Could not send.';
+  reqModal.classList.add('hidden');
+  ['rTo','rDepart','rReturn','rPax','rNotes'].forEach(id=>$('#'+id).value='');
+  toast('✓ Request sent — quotes usually land within the hour.');
+  boot();
+});
+
+/* ---------- pwa ---------- */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+boot();
+</script>
+</body>
+</html>
